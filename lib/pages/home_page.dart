@@ -1,47 +1,62 @@
 import 'package:flutter/material.dart';
-import 'profile_page.dart';
+import '../proxmox_api.dart';
+import '/node_status.dart';
 
-class HomePage extends StatelessWidget {
-  final String username;
-  final String email;
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
 
-  const HomePage({required this.username, required this.email});
+class _HomePageState extends State<HomePage> {
+  late ProxmoxApi api;
+  NodeStatus? nodeStatus;
+  String? error;
+
+  @override
+  void initState() {
+    super.initState();
+    api = ProxmoxApi(
+      baseUrl: 'https://not-pwned.fun/api2/json',
+      apiToken: 'root@pam!monitoring=bbdc4e94-c43d-44e4-867f-f754c9aeb008',
+    );
+    fetchNode();
+  }
+
+  Future<void> fetchNode() async {
+    try {
+      final status = await api.getNodeStatus('not-pwned');
+      setState(() {
+        nodeStatus = status;
+      });
+    } catch (e) {
+      setState(() {
+        error = e.toString();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ?? {};
+    final username = args['username'] ?? args['email'] ?? 'User';
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Home'),
-        backgroundColor: Color(0xFF3B62FF),
         actions: [
           IconButton(
             icon: Icon(Icons.person),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ProfilePage(username: username, email: email),
-                ),
-              );
-            },
+            onPressed: () => Navigator.pushNamed(context, '/profile', arguments: args),
           ),
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(30.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Welcome, $username!', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            SizedBox(height: 16),
-            Text('Email: $email', style: TextStyle(fontSize: 16)),
-            SizedBox(height: 24),
-            Text(
-              'Here is your main app content. You can show lists, charts, or anything your app represents.',
-              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-            ),
-          ],
-        ),
+        padding: const EdgeInsets.all(16.0),
+        child: nodeStatus == null
+            ? error != null
+            ? Center(child: Text('Error: $error'))
+            : Center(child: CircularProgressIndicator())
+            : NodeStatusWidget(api: api),
       ),
     );
   }

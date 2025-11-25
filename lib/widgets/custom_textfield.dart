@@ -9,7 +9,8 @@ class CustomTextField extends StatelessWidget {
     required this.controller,
     required this.labelText,
     this.obscureText = false,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +18,9 @@ class CustomTextField extends StatelessWidget {
       controller: controller,
       obscureText: obscureText,
       decoration: InputDecoration(
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
         labelText: labelText,
-        border: OutlineInputBorder(),
+        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
       ),
     );
   }

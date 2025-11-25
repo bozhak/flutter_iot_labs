@@ -12,9 +12,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'IoT Flutter Lab 2',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: LoginPage(),
+      title: 'Proxmox Dashboard',
+      theme: ThemeData(primarySwatch: Colors.blueGrey),
+      initialRoute: '/login',
+      routes: {
+        '/login': (_) => LoginPage(),
+        '/signup': (_) => SignUpPage(),
+        '/home': (_) => HomePage(),
+        '/profile': (_) => ProfilePage(),
+      },
     );
   }
 }

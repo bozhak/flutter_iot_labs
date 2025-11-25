@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_textfield.dart';
 import 'home_page.dart';
+import '../database.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -20,51 +21,68 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
+  void signUp() {
+    String email = _emailController.text;
+    String username = _usernameController.text;
+    String password = _passwordController.text;
+
+    if (email.contains('@') && username.isNotEmpty && password.length >= 6) {
+      usersDatabase[email] = {'username': username, 'password': password};
+
+      // !!! ВИПРАВЛЕНО: Перехід на HomePage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => HomePage(), // <--- Тепер веде на Home
+          settings: RouteSettings(arguments: {
+            'username': username,
+            'email': email,
+          }),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter valid information')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // ... (решта коду build залишається незмінною) ...
     return Scaffold(
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(30.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Welcome', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-              SizedBox(height: 6),
-              Text('Sign Up to continue', style: TextStyle(fontSize: 18)),
-              SizedBox(height: 26),
-              CustomTextField(controller: _usernameController, labelText: 'Username'),
-              SizedBox(height: 16),
-              CustomTextField(controller: _emailController, labelText: 'Email'),
-              SizedBox(height: 16),
-              CustomTextField(controller: _passwordController, labelText: 'Password', obscureText: true),
-              SizedBox(height: 26),
-              SizedBox(
-                width: double.infinity,
-                height: 49,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => HomePage(
-                          username: _usernameController.text,
-                          email: _emailController.text,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Text('Sign Up', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Welcome', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                SizedBox(height: 6),
+                Text('Sign up to continue', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 26),
+                CustomTextField(controller: _usernameController, labelText: 'Full Name'),
+                SizedBox(height: 16),
+                CustomTextField(controller: _emailController, labelText: 'Email'),
+                SizedBox(height: 16),
+                CustomTextField(controller: _passwordController, labelText: 'Password', obscureText: true),
+                SizedBox(height: 26),
+                SizedBox(
+                  width: double.infinity,
+                  height: 49,
+                  child: ElevatedButton(
+                    onPressed: signUp,
+                    child: Text('Sign Up'),
+                  ),
                 ),
-              ),
-              SizedBox(height: 16),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Text("Already have an account? Login", style: TextStyle(color: Colors.grey[700])),
-              ),
-            ],
+                SizedBox(height: 16),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Text("Already have an account? Login"),
+                ),
+              ],
+            ),
           ),
         ),
       ),

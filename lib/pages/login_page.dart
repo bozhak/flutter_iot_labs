@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_textfield.dart';
 import 'signup_page.dart';
+import 'profile_page.dart';
+import '../database.dart';
 import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -9,14 +11,43 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void login() {
+    String email = _emailController.text;
+    String password = _passwordController.text;
+
+    if (usersDatabase.containsKey(email)) {
+      if (usersDatabase[email]!['password'] == password) {
+        // !!! ВИПРАВЛЕНО: Перехід на HomePage
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => HomePage(), // <--- Тепер веде на Home
+            settings: RouteSettings(arguments: {
+              'username': usersDatabase[email]!['username'],
+              'email': email,
+            }),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Incorrect password')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Profile does not exist. Please sign up first.')),
+      );
+    }
   }
 
   @override
@@ -30,9 +61,9 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               Text('Welcome', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
               SizedBox(height: 6),
-              Text('Sign In to continue', style: TextStyle(fontSize: 18)),
+              Text('Login to continue', style: TextStyle(fontSize: 18)),
               SizedBox(height: 26),
-              CustomTextField(controller: _usernameController, labelText: 'Username'),
+              CustomTextField(controller: _emailController, labelText: 'Email'),
               SizedBox(height: 16),
               CustomTextField(controller: _passwordController, labelText: 'Password', obscureText: true),
               SizedBox(height: 26),
@@ -40,26 +71,17 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity,
                 height: 49,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => HomePage(
-                          username: _usernameController.text,
-                          email: 'no-email@example.com',
-                        ),
-                      ),
-                    );
-                  },
-                  child: Text('Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  onPressed: login,
+                  child: Text('Login'),
                 ),
               ),
               SizedBox(height: 16),
               GestureDetector(
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => SignUpPage()));
-                },
-                child: Text("Don't have an account? Sign Up", style: TextStyle(color: Colors.grey[700])),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => SignUpPage()),
+                ),
+                child: Text("Don't have an account? Sign Up"),
               ),
             ],
           ),
