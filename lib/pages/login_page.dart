@@ -27,11 +27,10 @@ class _LoginPageState extends State<LoginPage> {
 
     if (usersDatabase.containsKey(email)) {
       if (usersDatabase[email]!['password'] == password) {
-        // !!! ВИПРАВЛЕНО: Перехід на HomePage
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => HomePage(), // <--- Тепер веде на Home
+            builder: (_) => HomePage(),
             settings: RouteSettings(arguments: {
               'username': usersDatabase[email]!['username'],
               'email': email,

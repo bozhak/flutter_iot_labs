@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../database.dart'; // Переконайтеся, що цей шлях правильний
+import '../database.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -20,26 +20,19 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ?? {};
 
-    // Ініціалізація email та username з аргументів
     username = args['username'] ?? '';
     email = args['email'] ?? '';
 
-    // Перше завантаження даних
     _loadUserData();
   }
 
-  // 📥 Функція для перезавантаження всіх залежних даних користувача з бази
   void _loadUserData() {
-    // Якщо користувач існує, витягуємо всі його поля
     if (usersDatabase.containsKey(email)) {
-      // Оновлюємо змінні стану з даних бази
       phone = usersDatabase[email]!['phone'] ?? '';
       address = usersDatabase[email]!['address'] ?? '';
       birthdate = usersDatabase[email]!['birthdate'] ?? '';
-      // Також оновлюємо username, якщо він був змінений іншим чином
       username = usersDatabase[email]!['username'] ?? '';
     } else {
-      // Якщо користувача немає (наприклад, після зміни email або помилки)
       phone = '';
       address = '';
       birthdate = '';
@@ -66,22 +59,17 @@ class _ProfilePageState extends State<ProfilePage> {
       },
     );
 
-    // Перевірка на успішне збереження та зміну значення
     if (newValue != null && newValue.isNotEmpty && newValue != currentValue) {
 
-      // 🚀 Блок setState гарантує оновлення UI
       setState(() {
 
-        // 1. Оновлення бази даних
         if (title == 'Email') {
-          // Логіка оновлення email (ключа)
           final userData = usersDatabase[email]!;
           usersDatabase[newValue] = userData;
           usersDatabase.remove(email);
-          email = newValue; // Оновлюємо змінну стану email
+          email = newValue;
 
         } else if (usersDatabase.containsKey(email)) {
-          // Логіка оновлення інших полів
           switch (title) {
             case 'Username':
               usersDatabase[email]!['username'] = newValue;
@@ -98,8 +86,6 @@ class _ProfilePageState extends State<ProfilePage> {
           }
         }
 
-        // 2. 🔥 ПОВНЕ ПЕРЕЗАВАНТАЖЕННЯ ДАНИХ З БАЗИ після оновлення
-        // Цей виклик синхронізує всі локальні змінні з оновленою мапою.
         _loadUserData();
       });
 
@@ -108,7 +94,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
 
-  // buildField тепер не потребує колбеків, оскільки логіка в editField
   Widget buildField(String label, String value) {
     return ListTile(
       title: Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
@@ -145,7 +130,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Відображає username зі змінної стану
                         Text(username, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                         SizedBox(width: 8),
                         GestureDetector(
@@ -169,7 +153,6 @@ class _ProfilePageState extends State<ProfilePage> {
               elevation: 3,
               child: Column(
                 children: [
-                  // Відображає phone/address/birthdate зі змінних стану
                   buildField('Phone', phone),
                   Divider(height: 1),
                   buildField('Address', address),

@@ -29,11 +29,10 @@ class _SignUpPageState extends State<SignUpPage> {
     if (email.contains('@') && username.isNotEmpty && password.length >= 6) {
       usersDatabase[email] = {'username': username, 'password': password};
 
-      // !!! ВИПРАВЛЕНО: Перехід на HomePage
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => HomePage(), // <--- Тепер веде на Home
+          builder: (_) => HomePage(),
           settings: RouteSettings(arguments: {
             'username': username,
             'email': email,
@@ -49,7 +48,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    // ... (решта коду build залишається незмінною) ...
     return Scaffold(
       body: Center(
         child: Padding(
