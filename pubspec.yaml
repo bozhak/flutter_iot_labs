@@ -1,5 +1,5 @@
-name: auth_app
-description: Flutter authentication app with local storage for Lab 3
+name: iot_flutter_lab4
+description: IoT Flutter Lab 4 - Auth + MQTT
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -10,8 +10,17 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Локальне сховище даних
+  # Storage
   shared_preferences: ^2.2.2
+
+  # MQTT
+  mqtt_client: ^10.2.0
+
+  # Network connectivity
+  connectivity_plus: ^5.0.2
+
+  # Icons
+  cupertino_icons: ^1.0.6
 
 dev_dependencies:
   flutter_test:

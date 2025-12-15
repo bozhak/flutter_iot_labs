@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../core/validators/input_validators.dart';
 import '../../data/repositories/local_auth_repository.dart';
+import '../../core/services/connectivity_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -18,6 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _authRepository = LocalAuthRepository();
+  final _connectivityService = ConnectivityService();
 
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -37,6 +39,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
+    // Перевірка інтернет-з'єднання
+    final hasConnection = await _connectivityService.checkConnection();
+    if (!hasConnection) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('⚠️ Немає з\'єднання з Інтернетом'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     final success = await _authRepository.register(
@@ -52,7 +68,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Реєстрація успішна! Тепер ви можете увійти'),
+          content: Text('✅ Реєстрація успішна! Тепер ви можете увійти'),
           backgroundColor: Colors.green,
         ),
       );
@@ -60,7 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Користувач з таким email вже існує'),
+          content: Text('❌ Користувач з таким email вже існує'),
           backgroundColor: Colors.red,
         ),
       );

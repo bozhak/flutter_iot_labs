@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../core/validators/input_validators.dart';
 import '../../data/repositories/local_auth_repository.dart';
+import '../../core/services/connectivity_service.dart';
 import '../home/home_screen.dart';
 import 'register_screen.dart';
 
@@ -18,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authRepository = LocalAuthRepository();
+  final _connectivityService = ConnectivityService();
 
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -31,6 +33,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // Перевірка інтернет-з'єднання
+    final hasConnection = await _connectivityService.checkConnection();
+    if (!hasConnection) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('⚠️ Немає з\'єднання з Інтернетом'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 3),
+        ),
+      );
       return;
     }
 
@@ -55,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Невірний email або пароль'),
+          content: Text('❌ Невірний email або пароль'),
           backgroundColor: Colors.red,
         ),
       );
@@ -85,13 +101,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Icon(
-                    Icons.lock_outline,
+                    Icons.cloud_queue,
                     size: 80,
                     color: Colors.blue,
                   ),
                   const SizedBox(height: 32),
                   const Text(
-                    'Вітаємо!',
+                    'IoT MQTT Monitor',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 32,
