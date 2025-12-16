@@ -1,8 +1,9 @@
 // main.dart
 
 import 'package:flutter/material.dart';
-import 'data/repositories/local_auth_repository.dart';
+import 'data/repositories/hybrid_auth_repository.dart';
 import 'core/services/connectivity_service.dart';
+import 'core/services/token_storage.dart';
 import 'features/auth/login_screen.dart';
 import 'features/home/home_screen.dart';
 
@@ -75,8 +76,9 @@ class AuthCheck extends StatefulWidget {
 }
 
 class _AuthCheckState extends State<AuthCheck> {
-  final _authRepository = LocalAuthRepository();
+  final _authRepository = HybridAuthRepository();
   final _connectivityService = ConnectivityService();
+  final _tokenStorage = TokenStorage();
 
   bool _isLoading = true;
   bool _isLoggedIn = false;
@@ -92,17 +94,20 @@ class _AuthCheckState extends State<AuthCheck> {
     // Перевірка інтернет-з'єднання
     final hasConnection = await _connectivityService.checkConnection();
 
-    // Перевірка статусу автентифікації
+    // Перевірка наявності токена
+    final hasToken = await _tokenStorage.hasToken();
+
+    // Перевірка чи залогінений
     final isLoggedIn = await _authRepository.isLoggedIn();
 
     setState(() {
       _hasInternet = hasConnection;
-      _isLoggedIn = isLoggedIn;
+      _isLoggedIn = isLoggedIn || hasToken;
       _isLoading = false;
     });
 
-    // Якщо автологін без інтернету - показати попередження
-    if (isLoggedIn && !hasConnection) {
+    // Показати попередження про офлайн режим
+    if (_isLoggedIn && !hasConnection) {
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -144,7 +149,7 @@ class _AuthCheckState extends State<AuthCheck> {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Перевірка з\'єднання...',
+                'Перевірка авторизації...',
                 style: TextStyle(color: Colors.grey),
               ),
             ],

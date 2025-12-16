@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../core/validators/input_validators.dart';
-import '../../data/repositories/local_auth_repository.dart';
+import '../../data/repositories/hybrid_auth_repository.dart';
 import '../../core/services/connectivity_service.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -18,12 +18,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _authRepository = LocalAuthRepository();
+  final _authRepository = HybridAuthRepository();
   final _connectivityService = ConnectivityService();
 
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isOnline = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConnection();
+  }
+
+  Future<void> _checkConnection() async {
+    final hasConnection = await _connectivityService.checkConnection();
+    setState(() => _isOnline = hasConnection);
+  }
 
   @override
   void dispose() {
@@ -31,25 +43,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _connectivityService.dispose();
     super.dispose();
   }
 
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    // Перевірка інтернет-з'єднання
-    final hasConnection = await _connectivityService.checkConnection();
-    if (!hasConnection) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('⚠️ Немає з\'єднання з Інтернетом'),
-          backgroundColor: Colors.orange,
-          duration: Duration(seconds: 3),
-        ),
-      );
       return;
     }
 
@@ -67,8 +66,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✅ Реєстрація успішна! Тепер ви можете увійти'),
+        SnackBar(
+          content: Text(
+            _isOnline
+                ? '✅ Реєстрація успішна! Тепер ви можете увійти'
+                : '✅ Зареєстровано локально',
+          ),
           backgroundColor: Colors.green,
         ),
       );
@@ -88,6 +91,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Реєстрація'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Center(
+              child: Icon(
+                _isOnline ? Icons.wifi : Icons.wifi_off,
+                color: _isOnline ? Colors.white : Colors.orange,
+              ),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -106,11 +120,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Заповніть форму для реєстрації',
+                Text(
+                  _isOnline
+                      ? 'Заповніть форму для реєстрації'
+                      : 'Реєстрація в офлайн режимі',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey,
+                    color: _isOnline ? Colors.grey : Colors.orange,
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -178,10 +194,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   obscureText: _obscureConfirmPassword,
-                  validator: (value) => InputValidators.validateConfirmPassword(
-                    value,
-                    _passwordController.text,
-                  ),
+                  validator: (value) =>
+                      InputValidators.validateConfirmPassword(
+                        value,
+                        _passwordController.text,
+                      ),
                   textInputAction: TextInputAction.done,
                   onFieldSubmitted: (_) => _register(),
                 ),

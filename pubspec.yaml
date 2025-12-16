@@ -1,5 +1,5 @@
-name: iot_flutter_lab4
-description: IoT Flutter Lab 4 - Auth + MQTT
+name: iot_mqtt_monitor
+description: IoT Flutter Lab #5 - API Integration
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -10,16 +10,20 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Storage
+  # HTTP клієнт
+  dio: ^5.4.0
+
+  # Зберігання даних
   shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.0.0
 
   # MQTT
-  mqtt_client: ^10.2.0
+  mqtt_client: ^10.0.0
 
-  # Network connectivity
+  # Connectivity
   connectivity_plus: ^5.0.2
 
-  # Icons
+  # UI
   cupertino_icons: ^1.0.6
 
 dev_dependencies:
