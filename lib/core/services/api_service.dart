@@ -41,34 +41,36 @@ class ApiService {
     );
   }
 
-  // Auth endpoints
-  Future<Response> register(Map<String, dynamic> data) async {
-    return await _dio.post('/auth/register', data: data);
+  // ============= USER ENDPOINTS =============
+
+  /// Створити нового користувача (register)
+  Future<Response> createUser(Map<String, dynamic> data) async {
+    return await _dio.post('/users', data: data);
   }
 
-  Future<Response> login(Map<String, dynamic> data) async {
-    return await _dio.post('/auth/login', data: data);
+  /// Отримати всіх користувачів
+  Future<Response> getUsers() async {
+    return await _dio.get('/users');
   }
 
-  Future<Response> getCurrentUser() async {
-    return await _dio.get('/auth/me');
-  }
-
-  // Profile endpoints
-  Future<Response> updateProfile(Map<String, dynamic> data) async {
-    return await _dio.put('/profile', data: data);
-  }
-
-  Future<Response> deleteProfile() async {
-    return await _dio.delete('/profile');
-  }
-
-  Future<Response> changePassword(Map<String, dynamic> data) async {
-    return await _dio.post('/profile/change-password', data: data);
-  }
-
-  // User endpoints
-  Future<Response> getUser(String email) async {
+  /// Знайти користувача за email
+  Future<Response> getUserByEmail(String email) async {
+    // MockAPI підтримує фільтрацію через query params
     return await _dio.get('/users', queryParameters: {'email': email});
+  }
+
+  /// Отримати користувача за ID
+  Future<Response> getUserById(String id) async {
+    return await _dio.get('/users/$id');
+  }
+
+  /// Оновити користувача
+  Future<Response> updateUser(String id, Map<String, dynamic> data) async {
+    return await _dio.put('/users/$id', data: data);
+  }
+
+  /// Видалити користувача
+  Future<Response> deleteUser(String id) async {
+    return await _dio.delete('/users/$id');
   }
 }
